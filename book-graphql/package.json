@@ -1,0 +1,24 @@
+{
+  "name": "book-graphql",
+  "version": "1.0.0",
+  "main": "library-backend.js",
+  "scripts": {
+    "start": "node library-backend.js",
+    "dev": "nodemon library-backend.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.1",
+    "prettier-eslint": "^16.3.0",
+    "uuid": "^11.0.5"
+  }
+}
