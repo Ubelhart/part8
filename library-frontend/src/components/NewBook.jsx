@@ -1,33 +1,10 @@
 import { useState } from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { useMutation } from '@apollo/client'
 import PropTypes from 'prop-types'
-import { GET_AUTHORS, GET_BOOKS } from '../graphql/queries'
+import { GET_AUTHORS, GET_BOOKS, GET_BOOKS_BY_GENRE } from '../graphql/queries'
+import { CREATE_BOOK } from '../graphql/mutations'
 
-const CREATE_BOOK = gql`
-  mutation createBook(
-    $title: String!
-    $author: String!
-    $published: Int!
-    $genres: [String!]!
-  ) {
-    addBook(
-      book: {
-        title: $title
-        author: $author
-        published: $published
-        genres: $genres
-      }
-    ) {
-      id
-      title
-      author
-      published
-      genres
-    }
-  }
-`
-
-const NewBook = (props) => {
+const NewBook = ({ show }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -36,30 +13,59 @@ const NewBook = (props) => {
   const [createBook] = useMutation(CREATE_BOOK, {
     refetchQueries: [
       {
-        query: GET_BOOKS,
-      },
-      {
         query: GET_AUTHORS,
       },
     ],
+    update: (cache, response) => {
+      cache.updateQuery(
+        {
+          query: GET_BOOKS,
+        },
+        ({ allBooks }) => {
+          return {
+            allBooks: allBooks.concat(response.data.addBook),
+          }
+        }
+      )
+      genres.forEach((g) => {
+        cache.updateQuery(
+          {
+            query: GET_BOOKS_BY_GENRE,
+            variables: {
+              genre: g,
+            },
+          },
+          (data) => {
+            if (data) {
+              return {
+                allBooks: [...data.allBooks, response.data.addBook],
+              }
+            }
+            return {
+              allBooks: [response.data.addBook],
+            }
+          }
+        )
+      })
+    },
   })
 
-  if (!props.show) {
+  if (!show) {
     return null
   }
 
   const submit = async (event) => {
     event.preventDefault()
-
     await createBook({
       variables: {
-        title,
-        author,
-        published: parseInt(published),
-        genres,
+        book: {
+          title,
+          author,
+          published: parseInt(published),
+          genres,
+        },
       },
     })
-    console.log('add book...')
 
     setTitle('')
     setPublished('')

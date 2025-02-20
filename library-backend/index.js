@@ -101,14 +101,15 @@ const resolvers = {
         })
       }
 
-      const author = await Author.findOne({ name: book.author })
+      let author = await Author.findOne({ name: book.author })
       if (!author) {
-        return null
+        author = await Author.create({ name: book.author })
       }
+
       try {
         const newBook = await Book.create({
           ...book,
-          author: author._id,
+          author: author.id,
         })
         return newBook.populate('author')
       } catch (error) {
@@ -146,7 +147,7 @@ const resolvers = {
           extensions: { code: 'BAD_USER_INPUT' },
         })
       }
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET)
       return { value: token }
     },
   },
