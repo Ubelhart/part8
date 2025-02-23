@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import PropTypes from 'prop-types'
-import { GET_AUTHORS, GET_BOOKS, GET_BOOKS_BY_GENRE } from '../graphql/queries'
+import { GET_AUTHORS } from '../graphql/queries'
 import { CREATE_BOOK } from '../graphql/mutations'
 
-const NewBook = ({ show }) => {
+const NewBook = ({ show, updateCacheWith }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -17,36 +17,7 @@ const NewBook = ({ show }) => {
       },
     ],
     update: (cache, response) => {
-      cache.updateQuery(
-        {
-          query: GET_BOOKS,
-        },
-        ({ allBooks }) => {
-          return {
-            allBooks: allBooks.concat(response.data.addBook),
-          }
-        }
-      )
-      genres.forEach((g) => {
-        cache.updateQuery(
-          {
-            query: GET_BOOKS_BY_GENRE,
-            variables: {
-              genre: g,
-            },
-          },
-          (data) => {
-            if (data) {
-              return {
-                allBooks: [...data.allBooks, response.data.addBook],
-              }
-            }
-            return {
-              allBooks: [response.data.addBook],
-            }
-          }
-        )
-      })
+      updateCacheWith(response.data.addBook, genres)
     },
   })
 
@@ -122,6 +93,7 @@ const NewBook = ({ show }) => {
 
 NewBook.propTypes = {
   show: PropTypes.bool,
+  updateCacheWith: PropTypes.func,
 }
 
 export default NewBook

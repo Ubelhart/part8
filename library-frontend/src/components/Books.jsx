@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types'
 import { useLazyQuery, useQuery } from '@apollo/client'
 import { useState, useMemo } from 'react'
-import { GET_BOOKS, GET_BOOKS_BY_GENRE } from '../graphql/queries'
+import { GET_BOOKS } from '../graphql/queries'
 
 const Books = ({ show }) => {
   const [genre, setGenre] = useState(null)
   const { loading, error, data } = useQuery(GET_BOOKS)
-  const [getBooksByGenre, result] = useLazyQuery(GET_BOOKS_BY_GENRE)
+  const [getBooks, result] = useLazyQuery(GET_BOOKS)
 
   const genres = useMemo(() => {
     if (data) {
@@ -26,7 +26,7 @@ const Books = ({ show }) => {
   if (error) return <p>error</p>
 
   const handleClick = async (genre) => {
-    await getBooksByGenre({
+    await getBooks({
       variables: { genre },
     })
     setGenre(genre)

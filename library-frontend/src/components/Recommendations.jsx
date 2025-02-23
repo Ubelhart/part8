@@ -1,14 +1,16 @@
 import PropTypes from 'prop-types'
 import { useQuery } from '@apollo/client'
-import { ME, GET_BOOKS_BY_GENRE } from '../graphql/queries'
+import { ME, GET_BOOKS } from '../graphql/queries'
 
-const Recommendations = ({ show }) => {
-  const { loading, error, data } = useQuery(ME)
+const Recommendations = ({ show, token }) => {
+  const { loading, error, data } = useQuery(ME, {
+    skip: !token,
+  })
   const {
     loading: loadingBooks,
     error: errorBooks,
     data: dataBooks,
-  } = useQuery(GET_BOOKS_BY_GENRE, {
+  } = useQuery(GET_BOOKS, {
     variables: {
       genre: data?.me?.favoriteGenre,
     },
@@ -52,6 +54,7 @@ const Recommendations = ({ show }) => {
 
 Recommendations.propTypes = {
   show: PropTypes.bool,
+  token: PropTypes.string,
 }
 
 export default Recommendations
